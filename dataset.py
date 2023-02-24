@@ -42,8 +42,8 @@ class Dataset:
         for i, p in enumerate(paths):
             self._df = pd.concat([self._df, pd.read_csv(p)])
             # TODO: remove
-            if i > 5:
-                break
+            #if i > 5:
+            #    break
 
         # Add a new column timestamp
         self._df["timestamp"] = 0
