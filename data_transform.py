@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 from scipy.signal import medfilt, butter, filtfilt
+import pandas as pd
 
 
 class DataTransform:
@@ -39,10 +40,11 @@ class DataTransform:
     '''
 
     def standardization(self,vm):
-        vm2 = vm.iloc[:,2:].to_numpy()
+        columns_to_standardize = vm.columns[2:]
         scaler = StandardScaler()
-        vm2 = scaler.fit_transform(vm2)
-        return vm2
+        standardized_data = scaler.fit_transform(vm[columns_to_standardize])
+        vm[columns_to_standardize] = standardized_data
+        return vm
 
 
     def statistical_extraction(self,activity,vm):
@@ -107,7 +109,6 @@ class NoiseFilter:
         return filtered_data
             
     
-        
 
 class Segementation:
     def __init__(self,data,window_size,overlap,sampling_rate):
@@ -129,17 +130,19 @@ class Segementation:
         # Iterate over the data using a sliding window
         start_index = 0
         df = pd.DataFrame(data = self.data)
-        while start_index + window_length <= len(df_filtered):
+        while start_index + window_length <= len(df):
             end_index = start_index + window_length
             segment = df.iloc[start_index:end_index]
             segmented_data.append(segment)
             start_index += shift_length
 
         # Concatenate the segmented data into a new DataFrame
-        df = pd.concat(segmented_data)
+        df_seg = pd.concat(segmented_data)
 
         # Reset the index of the segmented DataFrame
-        df.reset_index(drop=True, inplace=True)
+        df_seg.reset_index(drop=True, inplace=True)
+
+        return df_seg
 
 
 
