@@ -14,16 +14,20 @@ class DataTransform:
 
     def calculate_vector_magnitude(self):
         df_transformed = self.df.copy()
-        position_list = ["lw","lh","la","ra"]
-        columns_to_calculate_VM = ["lw_x", "lw_y", "lw_z", "lh_x", "lh_y", "lh_z", "la_x", "la_y", "la_z", "ra_x", "ra_y", "ra_z"]
-        for i in range(0,len(columns_to_calculate_VM),3):
-            x_col = columns_to_calculate_VM[i]
-            y_col = columns_to_calculate_VM[i+1]
-            z_col = columns_to_calculate_VM[i+2]
-            for p in position_list:
-                magnitude_col = f"magnitude_{p}"
-                df_transformed[magnitude_col] = np.sqrt(self.df[x_col]**2 + self.df[y_col]**2 + self.df[z_col]**2)
-        df_result = df_transformed.drop(columns=columns_to_calculate_VM)  
+        positions = {
+            "lw": ["lw_x", "lw_y", "lw_z"],
+            "lh": ["lh_x", "lh_y", "lh_z"],
+            "la": ["la_x", "la_y", "la_z"],
+            "ra": ["ra_x", "ra_y", "ra_z"]
+        }
+
+        for position, columns in positions.items():
+            x_col, y_col, z_col = columns
+            magnitude_col = f"magnitude_{position}"
+            df_transformed[magnitude_col] = np.sqrt(self.df[x_col]**2 + self.df[y_col]**2 + self.df[z_col]**2)
+
+        columns_to_drop = [col for sublist in positions.values() for col in sublist]
+        df_result = df_transformed.drop(columns=columns_to_drop)     
         return df_result
 
 
@@ -40,16 +44,18 @@ class DataTransform:
     '''
 
     def standardization(self,vm):
-        columns_to_standardize = vm.columns[2:]
+        vm_copy = vm.copy()
+        columns_to_standardize = vm_copy.columns[2:]
         scaler = StandardScaler()
-        standardized_data = scaler.fit_transform(vm[columns_to_standardize])
-        vm[columns_to_standardize] = standardized_data
-        return vm
+        scaler.fit(vm_copy[columns_to_standardize])
+        standardized_data = scaler.transform(vm_copy[columns_to_standardize])
+        #standardized_data = scaler.fit_transform(vm_copy[columns_to_standardize])
+        vm_copy[columns_to_standardize] = standardized_data
+        return vm_copy
 
 
     def statistical_extraction(self,activity,vm):
-        results = []
-        data_processed = self.standardization(vm)
+        data_processed = vm
         
         mean = np.mean(data_processed)
         std = np.std(data_processed)
@@ -57,7 +63,7 @@ class DataTransform:
         minimum = np.min(data_processed)
         maximum = np.max(data_processed)
         result = {
-                'activity': f'{activity}',
+                'activity': activity,
                 'mean': mean,
                 'std': std,
                 'variance': variance,
