@@ -109,6 +109,41 @@ class NoiseFilter:
     
         
 
+class Segementation:
+    def __init__(self,data,window_size,overlap,sampling_rate):
+        self.data = data
+        self.ws = window_size
+        self.overlap = overlap
+        self.sample = sampling_rate
+    
+    def segmentation(self):
+        # Calculate the number of data points in each window
+        window_length = int(self.ws[0] * self.sample)
+
+        # Calculate the number of data points to shift the window by for the given overlap
+        shift_length = int(window_length * self.overlap)
+
+        # Initialize an empty list to store the segmented data
+        segmented_data = []
+
+        # Iterate over the data using a sliding window
+        start_index = 0
+        df = pd.DataFrame(data = self.data)
+        while start_index + window_length <= len(df_filtered):
+            end_index = start_index + window_length
+            segment = df.iloc[start_index:end_index]
+            segmented_data.append(segment)
+            start_index += shift_length
+
+        # Concatenate the segmented data into a new DataFrame
+        df = pd.concat(segmented_data)
+
+        # Reset the index of the segmented DataFrame
+        df.reset_index(drop=True, inplace=True)
+
+
+
+
 
 
 
