@@ -45,7 +45,7 @@ class DataTransform:
 
     def standardization(self,vm):
         vm_copy = vm.copy()
-        columns_to_standardize = vm_copy.columns[2:]
+        columns_to_standardize = vm_copy.columns[3:]
         scaler = StandardScaler()
         scaler.fit(vm_copy[columns_to_standardize])
         standardized_data = scaler.transform(vm_copy[columns_to_standardize])
